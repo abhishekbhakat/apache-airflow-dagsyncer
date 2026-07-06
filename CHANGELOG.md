@@ -19,6 +19,17 @@
 
 # Changelog
 
+## 0.0.1rc3 (2026-07-06)
+
+- Listener rebuilt as an Airflow plugin: FastAPI sub-app mounted into the
+  api-server via `AirflowPlugin.fastapi_apps` (edge3 pattern); inherits
+  api-server TLS and deployment; registered via `airflow.plugins` entry
+  point when the `[listen]` extra is installed
+- Endpoints move to `/dagsyncer/v1/manifest` and `/dagsyncer/v1/health`
+- Auth token now configured with `[dagsyncer] api_secret_key`
+  (`AIRFLOW__DAGSYNCER__API_SECRET_KEY`)
+- Removed the standalone stdlib HTTP server and the `listen` CLI command
+
 ## 0.0.1rc2 (2026-07-06)
 
 - Replace file-copy sync with syncer-listener architecture (edge-executor
