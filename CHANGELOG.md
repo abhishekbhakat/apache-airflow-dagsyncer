@@ -19,7 +19,7 @@
 
 # Changelog
 
-## 0.0.1rc2 (unreleased)
+## 0.0.1rc2 (2026-07-06)
 
 - Replace file-copy sync with syncer-listener architecture (edge-executor
   style: data plane pushes, control plane never dials in)
