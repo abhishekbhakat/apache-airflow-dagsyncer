@@ -1,6 +1,6 @@
 [project]
 name = "apache-airflow-dagsyncer"
-version = "0.0.1rc1"
+version = "0.0.1rc2"
 description = "CLI utility to sync DAG files into an Apache Airflow dags folder"
 license = { text = "Apache-2.0" }
 keywords = ["airflow", "dags", "sync"]
@@ -29,3 +29,98 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "airflow.dagsyncer"
 namespace = true
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+]
+
+# Ruff configuration adapted from apache/airflow pyproject.toml
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+extend-select = [
+    # Enable entire ruff rule section
+    "I", # Missing required import (auto-fixable)
+    "UP", # Pyupgrade
+    "ASYNC", # subset of flake8-async rules
+    "ISC", # Checks for implicit literal string concatenation (auto-fixable)
+    "TC", # Rules around TYPE_CHECKING blocks
+    "G", # flake8-logging-format rules
+    "LOG", # flake8-logging rules, most of them autofixable
+    "PT", # flake8-pytest-style rules
+    "B015", # Useless comparison: bare `a == b` is a no-op; prepend `assert` or remove
+    "TID25", # flake8-tidy-imports rules
+    "E", # pycodestyle rules
+    "W", # pycodestyle rules
+    # Per rule enables
+    "RUF006", # Checks for asyncio dangling task
+    "RUF015", # Checks for unnecessary iterable allocation for first element
+    "RUF019", # Checks for unnecessary key check
+    "RUF100", # Unused noqa (auto-fixable)
+    "D1",
+    "D2",
+    "D213", # Conflicts with D212.  Both can not be enabled.
+    "D3",
+    "D400",
+    "D401",
+    "D402",
+    "D403",
+    "D412",
+    "D419",
+    "PGH004", # Use specific rule codes when using noqa
+    "PGH005", # Invalid unittest.mock.Mock methods/attributes/properties
+    "S101", # Checks use `assert` outside the test cases
+    "B004", # Checks for use of hasattr(x, "__call__") and replaces it with callable(x)
+    "B006", # Checks for uses of mutable objects as function argument defaults.
+    "B007", # Checks for unused variables in the loop
+    "B008", # Do not perform function call in argument defaults
+    "B017", # Checks for pytest.raises context managers that catch Exception or BaseException.
+    "B019", # Use of functools.lru_cache or functools.cache on methods can lead to memory leaks
+    "B028", # No explicit stacklevel keyword argument found
+    "TRY002", # Prohibit use of `raise Exception`, use specific exceptions instead.
+    "RET505", # Unnecessary {branch} after return statement
+    "RET506", # Unnecessary {branch} after raise statement
+    "RET507", # Unnecessary {branch} after continue statement
+    "RET508", # Unnecessary {branch} after break statement
+    "SIM105", # Use contextlib.suppress({exception}) instead of try-except-pass
+    "PTH206", # Checks for uses of .split(os.sep)
+]
+ignore = [
+    "D100", # Unwanted; Docstring at the top of every file.
+    "D102", # Unwanted; Missing docstring in public method
+    "D103", # Unwanted; Missing docstring in public function
+    "D104", # Unwanted; Docstring at the top of every `__init__.py` file.
+    "D105", # Unwanted; Missing docstring in magic method
+    "D107", # Unwanted; Docstring in every constructor is unnecessary if the class has a docstring.
+    "D203", # Conflicts with D211.  Both can not be enabled.
+    "D212", # Conflicts with D213.  Both can not be enabled.
+    "E731", # Do not assign a lambda expression, use a def
+    "TC003", # Do not move imports from stdlib to TYPE_CHECKING block
+    # Rules set off to avoid conflicts with Ruff's formatter
+    "W191",
+    "E111",
+    "E114",
+    "E117",
+    "D206",
+    "D300",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "COM812",
+    "COM819",
+    "E501", # Formatted code may exceed the line length, leading to line-too-long (E501) errors.
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+combine-as-imports = true
+known-first-party = ["airflow.dagsyncer"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"src/airflow/dagsyncer/__init__.py" = ["I002"]

@@ -1,5 +1,7 @@
 """Command-line interface for apache-airflow-dagsyncer."""
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys

@@ -11,7 +11,8 @@ log = logging.getLogger(__name__)
 
 
 def sync_dags(source: str, dest: str, dry_run: bool = False) -> int:
-    """Sync python DAG files from ``source`` into ``dest``.
+    """
+    Sync python DAG files from ``source`` into ``dest``.
 
     Copies new and changed ``.py`` files, preserving relative layout.
     Returns 0 on success, 1 on error.
