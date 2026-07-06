@@ -6,6 +6,9 @@ import argparse
 import logging
 import sys
 
+from airflow.dagsyncer.client import PushError, push
+from airflow.dagsyncer.parse import ParseError
+
 log = logging.getLogger(__name__)
 
 
@@ -41,8 +44,11 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     args = build_parser().parse_args(argv)
     if args.command == "push":
-        log.error("push is not implemented yet (PLAN.md item 2)")
-        return 2
+        try:
+            return push(args.bundle_path, args.bundle_name, args.listener_url, args.token)
+        except (ParseError, PushError) as exc:
+            log.error("%s", exc)
+            return 1
     if args.command == "listen":
         log.error("listen is not implemented yet (PLAN.md item 3)")
         return 2
