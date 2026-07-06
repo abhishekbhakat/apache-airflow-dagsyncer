@@ -2,7 +2,8 @@
 name = "apache-airflow-dagsyncer"
 version = "0.0.1rc2"
 description = "CLI utility to sync DAG files into an Apache Airflow dags folder"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 keywords = ["airflow", "dags", "sync"]
 classifiers = [
     "Development Status :: 3 - Alpha",
