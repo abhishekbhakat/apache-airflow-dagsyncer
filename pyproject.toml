@@ -16,9 +16,17 @@ authors = [
     { name = "abhishekbhakat", email = "abhishek.bhakat@hotmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = [
-    "apache-airflow>=3.2.2",
+dependencies = []
+
+[project.optional-dependencies]
+listen = [
+    "apache-airflow>=3.2.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/abhishekbhakat/apache-airflow-dagsyncer"
+Repository = "https://github.com/abhishekbhakat/apache-airflow-dagsyncer"
+Issues = "https://github.com/abhishekbhakat/apache-airflow-dagsyncer/issues"
 
 [project.scripts]
 apache-airflow-dagsyncer = "airflow.dagsyncer.cli:main"

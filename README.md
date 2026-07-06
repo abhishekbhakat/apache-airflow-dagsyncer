@@ -24,18 +24,38 @@
 | License  | [![License](https://img.shields.io/:license-Apache%202-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0.txt) |
 | PyPI     | [![PyPI version](https://badge.fury.io/py/apache-airflow-dagsyncer.svg)](https://badge.fury.io/py/apache-airflow-dagsyncer) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/apache-airflow-dagsyncer.svg)](https://pypi.org/project/apache-airflow-dagsyncer/) |
 
-`apache-airflow-dagsyncer` is a command-line utility to sync Dag files from a
-source location into an [Apache Airflow](https://airflow.apache.org/) dags
-folder. It copies new and changed ``.py`` files while preserving the relative
-directory layout, making it easy to promote Dags from a source repository into
-a running Airflow deployment.
+`apache-airflow-dagsyncer` ships serialized dags from a data plane to an
+[Apache Airflow](https://airflow.apache.org/) control plane over HTTP/S -
+edge-executor style. The control plane never parses dag files and never
+dials into the data plane.
+
+```text
+  Data plane (remote)                        Control plane
++------------------------+    HTTP/S      +------------------------+
+| DagProcessor (run-once |  ---------->   | listener               |
+|   against local SQLite)|   manifest     |   auth + validation    |
+| syncer (push)          |                |   SerializedDagModel   |
+|   extracts serialized  |                |     .write_dag()       |
+|   dags, POSTs manifest |                |   -> control-plane DB  |
++------------------------+                +------------------------+
+```
+
+On each deployment the syncer runs the DagProcessor once against a local
+SQLite database, extracts the serialized dag JSON, and pushes a full bundle
+manifest to the listener. The listener ingests it through Airflow's own
+update path, so versioning, hashing, and consistency stay Airflow's
+responsibility. Dags absent from the manifest are deactivated.
+
+See [PROTOCOL.md](https://github.com/abhishekbhakat/apache-airflow-dagsyncer/blob/main/PROTOCOL.md) for the wire protocol.
+
+**Status: early development.** The `push` and `listen` commands are not
+implemented yet; the wire protocol (v1) is defined.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 **Table of contents**
 
 - [Requirements](#requirements)
 - [Installing from PyPI](#installing-from-pypi)
-- [Getting started](#getting-started)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
@@ -44,10 +64,16 @@ a running Airflow deployment.
 
 ## Requirements
 
-| Component      | Version         |
-|----------------|-----------------|
-| Python         | 3.12+           |
-| Apache Airflow | 3.2.2 or newer  |
+| Component | Version |
+|-----------|---------|
+| Python    | 3.12+   |
+
+The syncer side has no runtime dependencies. The listener side requires
+Apache Airflow, installed via the `[listen]` extra:
+
+```bash
+pip install "apache-airflow-dagsyncer[listen]"
+```
 
 ## Installing from PyPI
 
@@ -61,49 +87,22 @@ Or with [uv](https://docs.astral.sh/uv/):
 uv pip install apache-airflow-dagsyncer
 ```
 
-## Getting started
-
-Sync Dags from a source directory into your Airflow dags folder:
-
-```bash
-apache-airflow-dagsyncer sync --source /path/to/dag-repo --dest $AIRFLOW_HOME/dags
-```
-
-Preview changes without copying anything:
-
-```bash
-apache-airflow-dagsyncer sync --source /path/to/dag-repo --dest $AIRFLOW_HOME/dags --dry-run
-```
-
 ## Usage
 
-```text
-usage: apache-airflow-dagsyncer [-h] {sync} ...
+Data plane - parse a bundle and push it to the control plane:
 
-Sync DAG files from a source location into an Airflow dags folder.
-
-positional arguments:
-  {sync}
-    sync      Sync DAGs from source to destination
-
-options:
-  -h, --help  show this help message and exit
+```bash
+apache-airflow-dagsyncer push \
+  --bundle-path /opt/dags \
+  --bundle-name my-dags \
+  --listener-url https://cp.example.com:8793 \
+  --token "$DAGSYNCER_TOKEN"
 ```
 
-The `sync` command accepts:
+Control plane - run the listener:
 
-| Option      | Description                                    |
-|-------------|------------------------------------------------|
-| `--source`  | Source directory containing Dag files          |
-| `--dest`    | Destination Airflow dags folder                |
-| `--dry-run` | Show what would be synced without copying      |
-
-It can also be used programmatically:
-
-```python
-from airflow.dagsyncer.syncer import sync_dags
-
-sync_dags(source="/path/to/dag-repo", dest="/opt/airflow/dags", dry_run=True)
+```bash
+apache-airflow-dagsyncer listen --host 0.0.0.0 --port 8793
 ```
 
 ## Contributing
