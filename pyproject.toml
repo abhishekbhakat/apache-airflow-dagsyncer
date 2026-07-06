@@ -41,8 +41,19 @@ namespace = true
 
 [dependency-groups]
 dev = [
+    "apache-airflow>=3.2.0",
+    "mypy>=2.1.0",
+    "pytest>=9.1.1",
     "ruff>=0.9",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "src"
+files = ["src", "tests"]
 
 # Ruff configuration adapted from apache/airflow pyproject.toml
 [tool.ruff]
@@ -133,3 +144,4 @@ known-first-party = ["airflow.dagsyncer"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "src/airflow/dagsyncer/__init__.py" = ["I002"]
+"tests/*" = ["S101", "D101"]
