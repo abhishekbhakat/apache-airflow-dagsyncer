@@ -30,26 +30,30 @@ edge-executor style. The control plane never parses dag files and never
 dials into the data plane.
 
 ```text
-  Data plane (remote)                        Control plane
-+------------------------+    HTTP/S      +------------------------+
-| DagProcessor (run-once |  ---------->   | listener               |
-|   against local SQLite)|   manifest     |   auth + validation    |
-| syncer (push)          |                |   SerializedDagModel   |
-|   extracts serialized  |                |     .write_dag()       |
-|   dags, POSTs manifest |                |   -> control-plane DB  |
-+------------------------+                +------------------------+
+  Data plane (remote)                     Control plane
++------------------------+   HTTP/S    +---------------------------+
+| DagProcessor (run-once |  -------->  | Airflow api-server        |
+|   against local SQLite)|  manifest   | +-----------------------+ |
+| syncer (push)          |             | | dagsyncer plugin      | |
+|   extracts serialized  |             | |  auth + validation    | |
+|   dags, POSTs manifest |             | |  dag parsing update   | |
++------------------------+             | |  -> control-plane DB  | |
+                                        | +-----------------------+ |
+                                        +---------------------------+
 ```
 
 On each deployment the syncer runs the DagProcessor once against a local
 SQLite database, extracts the serialized dag JSON, and pushes a full bundle
-manifest to the listener. The listener ingests it through Airflow's own
-update path, so versioning, hashing, and consistency stay Airflow's
-responsibility. Dags absent from the manifest are deactivated.
+manifest to the listener. The listener is an Airflow plugin mounted into the
+api-server (edge3 provider pattern), so it inherits the api-server's TLS and
+deployment. Ingestion goes through Airflow's own dag parsing update path, so
+versioning, hashing, and consistency stay Airflow's responsibility. Dags
+absent from the manifest are deactivated.
 
 See [PROTOCOL.md](https://github.com/abhishekbhakat/apache-airflow-dagsyncer/blob/main/PROTOCOL.md) for the wire protocol.
 
-**Status: early development.** The `push` and `listen` commands are not
-implemented yet; the wire protocol (v1) is defined.
+**Status: early development.** Push client and listener plugin work
+end-to-end; full scheduler/edge-worker loop validation is in progress.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 **Table of contents**
@@ -89,20 +93,23 @@ uv pip install apache-airflow-dagsyncer
 
 ## Usage
 
+Control plane - install the listener next to the api-server and configure
+the shared secret; the plugin is discovered automatically:
+
+```bash
+pip install "apache-airflow-dagsyncer[listen]"
+export AIRFLOW__DAGSYNCER__API_SECRET_KEY="..."
+airflow api-server
+```
+
 Data plane - parse a bundle and push it to the control plane:
 
 ```bash
 apache-airflow-dagsyncer push \
   --bundle-path /opt/dags \
   --bundle-name my-dags \
-  --listener-url https://cp.example.com:8793 \
+  --listener-url https://airflow.example.com \
   --token "$DAGSYNCER_TOKEN"
-```
-
-Control plane - run the listener:
-
-```bash
-apache-airflow-dagsyncer listen --host 0.0.0.0 --port 8793
 ```
 
 ## Contributing

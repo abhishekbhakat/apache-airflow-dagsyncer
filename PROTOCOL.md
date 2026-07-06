@@ -1,9 +1,11 @@
 # Syncer <-> Listener wire protocol (v1)
 
-The syncer runs on the data plane next to the DagProcessor. The listener runs
-on the control plane with DB access. All communication is HTTP/S initiated by
-the syncer (edge-executor style: data plane dials out, control plane never
-dials in).
+The syncer runs on the data plane next to the DagProcessor. The listener is a
+FastAPI sub-app mounted into the control-plane Airflow api-server via the
+plugin mechanism (`AirflowPlugin.fastapi_apps`, edge3 provider pattern), so it
+inherits the api-server's port and TLS termination. All communication is
+HTTP/S initiated by the syncer (edge-executor style: data plane dials out,
+control plane never dials in).
 
 ## Flow
 
@@ -17,15 +19,20 @@ dials in).
 
 ## Endpoints
 
-| Method | Path              | Purpose                          |
-|--------|-------------------|----------------------------------|
-| GET    | `/api/v1/health`  | Liveness + protocol version      |
-| POST   | `/api/v1/manifest`| Ingest a full bundle manifest    |
+Served by the Airflow api-server under the `/dagsyncer` prefix.
+
+| Method | Path                    | Purpose                       |
+|--------|-------------------------|-------------------------------|
+| GET    | `/dagsyncer/v1/health`  | Liveness + protocol version   |
+| POST   | `/dagsyncer/v1/manifest`| Ingest a full bundle manifest |
 
 ## Authentication
 
-`Authorization: Bearer <token>` with a shared token (v1). JWT (edge-style)
-planned later. Requests without a valid token get `401`.
+`Authorization: Bearer <token>` with a shared token (v1). The control plane
+configures the token via `[dagsyncer] api_secret_key` in Airflow config (or
+`AIRFLOW__DAGSYNCER__API_SECRET_KEY`). Requests without a valid token get
+`401`; an unconfigured secret yields `503`. JWT (edge-style) planned later.
+TLS is the api-server's responsibility.
 
 ## Manifest payload
 

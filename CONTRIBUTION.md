@@ -38,9 +38,9 @@ The dev group installs `apache-airflow`, `ruff`, `mypy`, and `pytest`.
 | `src/airflow/dagsyncer/protocol.py` | Wire protocol dataclasses (stdlib only)      |
 | `src/airflow/dagsyncer/parse.py`  | One-shot DagProcessor run + SQLite extraction  |
 | `src/airflow/dagsyncer/client.py` | HTTP push client (stdlib only)                 |
-| `src/airflow/dagsyncer/server.py` | Listener HTTP server (stdlib only)             |
+| `src/airflow/dagsyncer/listener_plugin.py` | FastAPI listener plugin for the api-server (requires Airflow) |
 | `src/airflow/dagsyncer/ingest.py` | Control-plane ingestion (requires Airflow)     |
-| `src/airflow/dagsyncer/cli.py`    | `push` / `listen` commands                     |
+| `src/airflow/dagsyncer/cli.py`    | `push` command                                 |
 | `PROTOCOL.md`                     | Wire protocol specification                    |
 
 `airflow.dagsyncer` is a PEP 420 namespace package under Airflow's `airflow`

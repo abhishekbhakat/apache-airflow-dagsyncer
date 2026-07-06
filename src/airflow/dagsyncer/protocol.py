@@ -14,8 +14,8 @@ from typing import Any
 
 PROTOCOL_VERSION = 1
 
-MANIFEST_ENDPOINT = "/api/v1/manifest"
-HEALTH_ENDPOINT = "/api/v1/health"
+MANIFEST_ENDPOINT = "/dagsyncer/v1/manifest"
+HEALTH_ENDPOINT = "/dagsyncer/v1/health"
 AUTH_HEADER = "Authorization"
 
 
