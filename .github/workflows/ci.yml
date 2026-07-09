@@ -23,26 +23,20 @@ jobs:
       - run: uv run mypy
 
   test:
+    name: test (airflow ${{ matrix.airflow }})
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
-      - run: uv sync --dev
-      - run: uv run pytest -q
-
-  test-lowest:
-    name: test (lowest airflow floor)
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        airflow: ["3.2.0", "3.3.0"]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
       - run: uv venv --clear
-      - run: uv pip install --resolution lowest-direct --group pyproject.toml:dev -e .
-      - run: uv run --no-sync python -c "import airflow; assert airflow.__version__ == '3.2.0', airflow.__version__"
+      - run: uv pip install --group pyproject.toml:dev -e . "apache-airflow==${{ matrix.airflow }}"
+      - run: uv run --no-sync python -c "import airflow; assert airflow.__version__ == '${{ matrix.airflow }}', airflow.__version__"
       - run: uv run --no-sync pytest -q
 
   build:

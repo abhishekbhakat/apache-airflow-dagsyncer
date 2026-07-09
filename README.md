@@ -38,8 +38,8 @@ dials into the data plane.
 |   extracts serialized  |             | |  auth + validation    | |
 |   dags, POSTs manifest |             | |  dag parsing update   | |
 +------------------------+             | |  -> control-plane DB  | |
-                                        | +-----------------------+ |
-                                        +---------------------------+
+                                       | +-----------------------+ |
+                                       +---------------------------+
 ```
 
 On each deployment the syncer runs the DagProcessor once against a local
@@ -52,8 +52,12 @@ absent from the manifest are deactivated.
 
 See [PROTOCOL.md](https://github.com/abhishekbhakat/apache-airflow-dagsyncer/blob/main/PROTOCOL.md) for the wire protocol.
 
-**Status: early development.** Push client and listener plugin work
-end-to-end; full scheduler/edge-worker loop validation is in progress.
+**Status: early development / AIP-92 workaround.** Push client and
+listener plugin work end-to-end; full scheduler/edge-worker loop validation
+is in progress. This package exists because [AIP-92](AIP-92-progress.md) -
+upstream's planned DAG-processor isolation - is still a draft and not yet
+implemented end-to-end. When AIP-92 lands natively, dagsyncer should become
+unnecessary and can be deprecated.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 **Table of contents**

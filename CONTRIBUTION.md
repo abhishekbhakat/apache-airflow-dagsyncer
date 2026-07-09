@@ -66,9 +66,7 @@ adapted from apache/airflow.
 `.github/workflows/ci.yml` runs on every PR and push to `main`:
 
 - `lint`: ruff check, ruff format check, mypy (strict)
-- `test`: pytest against the locked (highest) resolution
-- `test-lowest`: pytest with `--resolution lowest-direct` to prove the
-  declared `apache-airflow>=3.2.0` floor
+- `test`: pytest matrix against floor (`3.2.0`) and current (`3.3.0`)
 - `build`: `uv build` and a smoke run of the built wheel
 
 ## Release process
@@ -79,9 +77,9 @@ Releases are tag-driven and published to PyPI via trusted publishing
 Release candidates use PEP 440 pre-release versions (for example
 `0.0.1rc2`); pip only installs them with `--pre` or an exact pin.
 
-1. Bump the version in **both** places, keeping them identical:
-   - `pyproject.toml` (`[project] version`)
-   - `src/airflow/dagsyncer/__init__.py` (`__version__`)
+1. Bump the version in `pyproject.toml` (`[project] version`).
+   `__version__` is read from package metadata at runtime via
+   `importlib.metadata`, so it does not need a separate edit.
 2. Update `CHANGELOG.md`.
 3. Commit and push, then tag with the exact version string:
 

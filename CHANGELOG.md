@@ -19,6 +19,12 @@
 
 # Changelog
 
+## 0.0.1rc4 (2026-07-09)
+
+- CI tests against Airflow floor `3.2.0` and current `3.3.0`
+- Document package as an interim AIP-92 workaround
+  (`AIP-92-progress.md`, README status note)
+
 ## 0.0.1rc3 (2026-07-06)
 
 - Listener rebuilt as an Airflow plugin: FastAPI sub-app mounted into the

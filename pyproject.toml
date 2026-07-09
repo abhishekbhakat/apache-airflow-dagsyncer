@@ -1,6 +1,6 @@
 [project]
 name = "apache-airflow-dagsyncer"
-version = "0.0.1rc3"
+version = "0.0.1rc4"
 description = "CLI utility to sync DAG files into an Apache Airflow dags folder"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
